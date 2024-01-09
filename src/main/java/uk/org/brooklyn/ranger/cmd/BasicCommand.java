@@ -1,12 +1,13 @@
-package uk.org.brooklyn.zkshell.cmd;
+package uk.org.brooklyn.ranger.cmd;
 
+import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.shell.command.CommandContext;
 import org.springframework.shell.command.CommandRegistration;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
-import uk.org.brooklyn.zkshell.context.ZkContext;
+import uk.org.brooklyn.ranger.context.ZkContext;
 
 /**
  * @author ImBrooklyn
@@ -18,9 +19,12 @@ public class BasicCommand {
 
     private final ZkContext zkContext;
 
+    private final CuratorFramework zkClient;
+
     @Autowired
-    public BasicCommand(ZkContext zkContext) {
+    public BasicCommand(ZkContext zkContext, CuratorFramework zkClient) {
         this.zkContext = zkContext;
+        this.zkClient = zkClient;
     }
 
     @Bean
@@ -61,11 +65,12 @@ public class BasicCommand {
             return changeCurrentWorkNode(node.substring(0, node.length() - 1));
         }
 
-        String sb = zkContext.getCursor() +
+        String path = zkContext.getCursor() +
                 (zkContext.getCursor().endsWith("/") ? "" : "/") +
                 node;
 
-        zkContext.setCursor(sb);
+
+        zkContext.setCursor(path);
         return zkContext.getCursor();
     }
 }

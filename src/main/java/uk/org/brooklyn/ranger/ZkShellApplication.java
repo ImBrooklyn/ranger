@@ -1,4 +1,4 @@
-package uk.org.brooklyn.zkshell;
+package uk.org.brooklyn.ranger;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,11 +1,11 @@
-package uk.org.brooklyn.zkshell.config;
+package uk.org.brooklyn.ranger.config;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.jline.PromptProvider;
 import org.springframework.stereotype.Component;
-import uk.org.brooklyn.zkshell.context.ZkContext;
+import uk.org.brooklyn.ranger.context.ZkContext;
 
 /**
  * @author ImBrooklyn
@@ -24,7 +24,7 @@ public class ZkShellPromptProvider implements PromptProvider {
     @Override
     public AttributedString getPrompt() {
         return new AttributedString(
-                "zk-shell: " + zkContext.getCursor() + " > ",
+                "ranger: " + zkContext.getCursor() + " > ",
                 AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW));
     }
 }

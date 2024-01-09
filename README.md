@@ -1,2 +1,2 @@
-# zk-shell
-Zookeeper interactive Shell
+# ranger
+Interactive Zookeeper Shell
