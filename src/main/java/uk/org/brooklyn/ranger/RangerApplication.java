@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 07/01/2024
  */
 @SpringBootApplication
-public class ZkShellApplication {
+public class RangerApplication {
     public static void main(String[] args) {
-        SpringApplication application = new SpringApplication(ZkShellApplication.class);
+        SpringApplication application = new SpringApplication(RangerApplication.class);
         application.run(args);
     }
 }

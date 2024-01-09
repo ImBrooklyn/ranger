@@ -12,12 +12,12 @@ import uk.org.brooklyn.ranger.context.ZkContext;
  * @since 07/01/2024
  */
 @Component
-public class ZkShellPromptProvider implements PromptProvider {
+public class RangerPromptProvider implements PromptProvider {
 
     private final ZkContext zkContext;
 
     @Autowired
-    public ZkShellPromptProvider(ZkContext zkContext) {
+    public RangerPromptProvider(ZkContext zkContext) {
         this.zkContext = zkContext;
     }
 
