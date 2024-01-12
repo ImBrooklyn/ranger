@@ -47,10 +47,10 @@ public class BasicCommand {
                 .command("cd")
                 .description("Changes current work node.")
                 .withOption()
-                    .position(0)
-                    .longNames("node")
-                    .type(String.class)
-                    .completion(ctx -> zkClient.children(zkContext.getCursor())
+                .position(0)
+                .longNames("node")
+                .type(String.class)
+                .completion(ctx -> zkClient.children(zkContext.getCursor())
                         .stream().map(CompletionProposal::new)
                         .collect(Collectors.toList()))
                 .and()
@@ -68,7 +68,7 @@ public class BasicCommand {
                 .longNames("node")
                 .position(0)
                 .required(false)
-                .defaultValue(zkContext.getCursor())
+                .defaultValue(".")
                 .and()
                 .withTarget().function(this::listChildren)
                 .and()
@@ -104,30 +104,25 @@ public class BasicCommand {
             return node;
         }
 
-        final String cursor = zkContext.getCursor();
-
         if (node.endsWith("/")) {
             return findNode(node.substring(0, node.length() - 1));
         }
 
-        if (".".equals(node)) {
-            return cursor;
+        final String cursor = zkContext.getCursor();
+        switch (node) {
+            case "." -> {
+                return cursor;
+            }
+            case ".." -> {
+                return findNode(cursor.substring(0, cursor.lastIndexOf('/')));
+            }
+            default -> {
+                node = node.startsWith("/") ? node : (cursor + (cursor.equals("/") ? "" : "/") + node);
+                if (!zkClient.exists(node)) {
+                    throw new ZkNodeNotExistException(node);
+                }
+            }
         }
-
-        if ("..".equals(node)) {
-            return findNode(cursor.substring(0, cursor.lastIndexOf('/')));
-        }
-
-        if (!node.startsWith("/")) {
-            node = cursor +
-                    (cursor.equals("/") ? "" : "/") +
-                    node;
-        }
-
-        if (!zkClient.exists(node)) {
-            throw new ZkNodeNotExistException(node);
-        }
-
         return node;
     }
 }
