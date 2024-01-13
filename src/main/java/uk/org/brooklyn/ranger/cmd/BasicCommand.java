@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.shell.CompletionProposal;
 import org.springframework.shell.command.CommandContext;
 import org.springframework.shell.command.CommandRegistration;
-import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import uk.org.brooklyn.ranger.client.ZookeeperClient;
+import uk.org.brooklyn.ranger.context.CommandAvailability;
 import uk.org.brooklyn.ranger.context.ZkContext;
 import uk.org.brooklyn.ranger.exception.ZkNodeNotExistException;
 
@@ -18,16 +18,21 @@ import java.util.stream.Collectors;
  * @since 07/01/2024
  */
 @ShellComponent
-@ShellCommandGroup("BasicCommands")
 public class BasicCommand {
 
     private final ZkContext zkContext;
 
+    private final CommandAvailability cmdAvailability;
+
     private final ZookeeperClient zkClient;
 
+    private static final String CMD_GROUP = "Basic commands";
+
+
     @Autowired
-    public BasicCommand(ZkContext zkContext, ZookeeperClient zkClient) {
+    public BasicCommand(ZkContext zkContext, CommandAvailability cmdAvailability, ZookeeperClient zkClient) {
         this.zkContext = zkContext;
+        this.cmdAvailability = cmdAvailability;
         this.zkClient = zkClient;
     }
 
@@ -35,7 +40,9 @@ public class BasicCommand {
     public CommandRegistration pwd() {
         return CommandRegistration.builder()
                 .command("pwd")
-                .description("Prints current work node.")
+                .description("Print current work node.")
+                .availability(cmdAvailability::connected)
+                .group(CMD_GROUP)
                 .withTarget().function(ctx -> zkContext.getCursor())
                 .and()
                 .build();
@@ -45,14 +52,16 @@ public class BasicCommand {
     public CommandRegistration cd() {
         return CommandRegistration.builder()
                 .command("cd")
-                .description("Changes current work node.")
+                .description("Change current work node.")
+                .availability(cmdAvailability::connected)
+                .group(CMD_GROUP)
                 .withOption()
-                .position(0)
-                .longNames("node")
-                .type(String.class)
-                .completion(ctx -> zkClient.children(zkContext.getCursor())
-                        .stream().map(CompletionProposal::new)
-                        .collect(Collectors.toList()))
+                    .position(0)
+                    .longNames("node")
+                    .type(String.class)
+                    .completion(ctx -> zkClient.children(zkContext.getCursor())
+                            .stream().map(CompletionProposal::new)
+                            .collect(Collectors.toList()))
                 .and()
                 .withTarget().function(this::changeCurrentWorkNode)
                 .and()
@@ -63,12 +72,14 @@ public class BasicCommand {
     public CommandRegistration ls() {
         return CommandRegistration.builder()
                 .command("ls")
-                .description("Lists children of current work node.")
+                .description("List children of current work node.")
+                .availability(cmdAvailability::connected)
+                .group(CMD_GROUP)
                 .withOption()
-                .longNames("node")
-                .position(0)
-                .required(false)
-                .defaultValue(".")
+                    .longNames("node")
+                    .position(0)
+                    .required(false)
+                    .defaultValue(".")
                 .and()
                 .withTarget().function(this::listChildren)
                 .and()
