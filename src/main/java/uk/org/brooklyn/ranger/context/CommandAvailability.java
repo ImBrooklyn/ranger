@@ -10,13 +10,10 @@ import uk.org.brooklyn.ranger.client.ZookeeperClient;
  * @since 13/01/2024
  */
 @Component
-public class CommandAvailability {
-
-    private final ZookeeperClient zkClient;
+public record CommandAvailability(ZookeeperClient zkClient) {
 
     @Autowired
-    public CommandAvailability(ZookeeperClient zkClient) {
-        this.zkClient = zkClient;
+    public CommandAvailability {
     }
 
     public Availability connected() {

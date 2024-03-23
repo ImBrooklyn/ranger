@@ -3,13 +3,11 @@ package uk.org.brooklyn.ranger.cmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.shell.CompletionProposal;
-import org.springframework.shell.command.CommandContext;
 import org.springframework.shell.command.CommandRegistration;
 import org.springframework.shell.standard.ShellComponent;
 import uk.org.brooklyn.ranger.client.ZookeeperClient;
 import uk.org.brooklyn.ranger.context.CommandAvailability;
 import uk.org.brooklyn.ranger.context.ZkContext;
-import uk.org.brooklyn.ranger.exception.ZkNodeNotExistException;
 
 import java.util.stream.Collectors;
 
@@ -63,7 +61,7 @@ public class BasicCommand {
                             .stream().map(CompletionProposal::new)
                             .collect(Collectors.toList()))
                 .and()
-                .withTarget().function(this::changeCurrentWorkNode)
+                .withTarget().function(zkContext::changeCurrentWorkNode)
                 .and()
                 .build();
     }
@@ -81,59 +79,8 @@ public class BasicCommand {
                     .required(false)
                     .defaultValue(".")
                 .and()
-                .withTarget().function(this::listChildren)
+                .withTarget().function(zkContext::listChildren)
                 .and()
                 .build();
-    }
-
-    private String changeCurrentWorkNode(CommandContext ctx) {
-        String node = ctx.getOptionValue("node");
-        try {
-            node = findNode(node);
-        } catch (ZkNodeNotExistException e) {
-            ctx.getTerminal().writer().printf("Node [ %s ] does not exist...%n", e.getPath());
-            return null;
-        }
-        zkContext.setCursor(node);
-        return node;
-    }
-
-    private String listChildren(CommandContext ctx) {
-        String node = ctx.getOptionValue("node");
-        try {
-            node = findNode(node);
-        } catch (ZkNodeNotExistException e) {
-            ctx.getTerminal().writer().printf("Node [ %s ] does not exist...%n", e.getPath());
-            return null;
-        }
-        return String.join(" ", zkClient.children(findNode(node)));
-    }
-
-    private String findNode(String node) {
-        if (node == null || node.isBlank()) {
-            node = "/";
-            return node;
-        }
-
-        if (node.endsWith("/")) {
-            return findNode(node.substring(0, node.length() - 1));
-        }
-
-        final String cursor = zkContext.getCursor();
-        switch (node) {
-            case "." -> {
-                return cursor;
-            }
-            case ".." -> {
-                return findNode(cursor.substring(0, cursor.lastIndexOf('/')));
-            }
-            default -> {
-                node = node.startsWith("/") ? node : (cursor + (cursor.equals("/") ? "" : "/") + node);
-                if (!zkClient.exists(node)) {
-                    throw new ZkNodeNotExistException(node);
-                }
-            }
-        }
-        return node;
     }
 }

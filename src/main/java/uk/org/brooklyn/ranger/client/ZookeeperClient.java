@@ -1,5 +1,7 @@
 package uk.org.brooklyn.ranger.client;
 
+import uk.org.brooklyn.ranger.model.NodeStat;
+
 import java.util.List;
 
 /**
@@ -15,5 +17,7 @@ public interface ZookeeperClient {
     boolean exists(String path);
 
     List<String> children(String path);
+
+    NodeStat stat(String path);
 
 }

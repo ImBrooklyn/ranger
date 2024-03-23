@@ -11,6 +11,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.org.brooklyn.ranger.client.ZookeeperClient;
+import uk.org.brooklyn.ranger.convertor.CuratorBeanConvertor;
+import uk.org.brooklyn.ranger.model.NodeStat;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -77,6 +79,14 @@ public class CuratorZookeeperClientImpl implements ZookeeperClient, Initializing
     @Override
     public List<String> children(String path) {
         return zkClient.getChildren().forPath(path);
+    }
+
+    @Override
+    @SneakyThrows
+    public NodeStat stat(String path) {
+        Stat stat = new Stat();
+        zkClient.getData().storingStatIn(stat).forPath(path);
+        return CuratorBeanConvertor.toNodeStat(stat);
     }
 
 }
