@@ -1,9 +1,12 @@
 package uk.org.brooklyn.ranger.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.command.CommandContext;
 import org.springframework.stereotype.Component;
 import uk.org.brooklyn.ranger.client.ZookeeperClient;
+import uk.org.brooklyn.ranger.exception.ZkNodeAlreadyExistException;
 import uk.org.brooklyn.ranger.exception.ZkNodeNotExistException;
 
 /**
@@ -18,17 +21,12 @@ public class ZkContext {
     @Autowired
     public ZkContext(ZookeeperClient zkClient) {
         this.zkClient = zkClient;
+        this.cursor = "/";
     }
 
-    private String cursor = "/";
-
-    public void setCursor(String cursor) {
-        this.cursor = cursor;
-    }
-
-    public String getCursor() {
-        return this.cursor;
-    }
+    @Getter
+    @Setter
+    private String cursor;
 
 
     public String changeCurrentWorkNode(CommandContext ctx) {
@@ -54,6 +52,17 @@ public class ZkContext {
         }
 
         return node;
+    }
+
+    public String newNode(CommandContext ctx) {
+        String node = ctx.getOptionValue("node");
+        try {
+            node = findNode(node);
+        } catch (ZkNodeNotExistException e) {
+            return e.getPath();
+        }
+        ctx.getTerminal().writer().printf("Node [ %s ] already exist...%n", node);
+        return null;
     }
 
     private String findNode(String node) {

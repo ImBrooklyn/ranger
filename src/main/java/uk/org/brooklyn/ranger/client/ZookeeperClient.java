@@ -20,4 +20,6 @@ public interface ZookeeperClient {
 
     NodeStat stat(String path);
 
+    void create(String path, boolean ephemeral, boolean sequential);
+
 }

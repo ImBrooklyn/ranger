@@ -16,7 +16,8 @@ public final class BeanFormatter {
     private static final String SPACE = " ";
     private static final String EMPTY = "";
     private static final String SEPARATOR = SPACE.repeat(2);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT =
+            ThreadLocal.withInitial(() -> new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"));
 
     @SneakyThrows
     public static String format(Printable bean) {
@@ -43,7 +44,7 @@ public final class BeanFormatter {
             Object val = field.get(bean);
             String value = switch (val) {
                 case null -> EMPTY;
-                case Date d -> DATE_FORMAT.format(d);
+                case Date d -> DATE_FORMAT.get().format(d);
                 default -> String.valueOf(val);
             };
 

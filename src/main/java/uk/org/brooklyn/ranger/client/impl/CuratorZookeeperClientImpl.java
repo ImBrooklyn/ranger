@@ -1,11 +1,13 @@
 package uk.org.brooklyn.ranger.client.impl;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +59,7 @@ public class CuratorZookeeperClientImpl implements ZookeeperClient, Initializing
             }
             return true;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             Thread.currentThread().interrupt();
         }
         return false;
@@ -87,6 +89,53 @@ public class CuratorZookeeperClientImpl implements ZookeeperClient, Initializing
         Stat stat = new Stat();
         zkClient.getData().storingStatIn(stat).forPath(path);
         return CuratorBeanConvertor.toNodeStat(stat);
+    }
+
+    @Override
+    @SneakyThrows
+    public void create(String path, boolean ephemeral, boolean sequential) {
+        zkClient.create()
+                .creatingParentsIfNeeded()
+                .withMode(NodeModeEnum.withOption(ephemeral, sequential).getMode())
+                .forPath(path);
+    }
+
+    private enum NodeModeEnum {
+        PERSISTENT(0, CreateMode.PERSISTENT),
+        PERSISTENT_SEQUENTIAL(1, CreateMode.PERSISTENT_SEQUENTIAL),
+        EPHEMERAL(2, CreateMode.EPHEMERAL),
+        EPHEMERAL_SEQUENTIAL(3, CreateMode.EPHEMERAL_SEQUENTIAL),
+
+        ;
+
+        private final int code;
+
+        @Getter
+        private final CreateMode mode;
+
+
+        NodeModeEnum(int code, CreateMode mode) {
+            this.code = code;
+            this.mode = mode;
+        }
+
+        static NodeModeEnum withOption(boolean ephemeral, boolean sequential) {
+            int code = 0;
+            if (ephemeral) {
+                code |= 2;  // 10
+            }
+
+            if (sequential) {
+                code |= 1; // 01
+            }
+            for (NodeModeEnum value : values()) {
+                if (code == value.code) {
+                    return value;
+                }
+            }
+            return PERSISTENT;
+        }
+
     }
 
 }

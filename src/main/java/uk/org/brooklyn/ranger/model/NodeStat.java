@@ -10,16 +10,15 @@ import java.util.Date;
  * @since 23/03/2024
  */
 @Builder
-public class NodeStat implements Printable {
-    private final long cZxid;
-    private final Date ctime;
-    private final long mZxid;
-    private final Date mtime;
-    private final long pZxid;
-    private final int cversion;
-    private final int dataVersion;
-    private final int aclVersion;
-    private final long ephemeralOwner;
-    private final int dataLength;
-    private final int numChildren;
+public record NodeStat(long cZxid,
+                       Date ctime,
+                       long mZxid,
+                       Date mtime,
+                       long pZxid,
+                       int cversion,
+                       int dataVersion,
+                       int aclVersion,
+                       long ephemeralOwner,
+                       int dataLength,
+                       int numChildren) implements Printable {
 }

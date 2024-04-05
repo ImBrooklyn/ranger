@@ -4,14 +4,13 @@ import lombok.Getter;
 
 /**
  * @author ImBrooklyn
- * @since 12/01/2024
+ * @since 05/04/2024
  */
 @Getter
-public class ZkNodeNotExistException extends RuntimeException {
-
+public class ZkNodeAlreadyExistException extends RuntimeException {
     private final String path;
 
-    public ZkNodeNotExistException(String path) {
+    public ZkNodeAlreadyExistException(String path) {
         this.path = path;
     }
 
